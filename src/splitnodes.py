@@ -22,12 +22,3 @@ def split_nodes_delimiter(
             else:
                 new_nodes.append(TextNode(old_node_splits[i], text_type))
     return new_nodes
-
-
-test_cases = [
-    TextNode("What a **bold** choice.", TextType.TEXT),
-    TextNode("**This** is how to _emphasize_ text", TextType.TEXT),
-    TextNode("This text ends in **bold**", TextType.TEXT),
-    TextNode("This is plain text.", TextType.TEXT),
-]
-split_nodes_delimiter(test_cases, "**", TextType.BOLD)
