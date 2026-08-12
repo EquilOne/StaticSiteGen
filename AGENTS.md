@@ -4,27 +4,28 @@ Pure Python 3 stdlib static site generator. Learning project, MIT License.
 
 ## Commands
 
-- **Run**: `bash main.sh` or `python3 src/main.py`
-- **Test all**: `bash test.sh` (equiv. `python3 -m unittest discover -s src`)
-- **Single test**: `python3 -m unittest discover -s src -p test_splitnodes.py`
+Run from repo root. `main.sh` and `test.sh` are thin wrappers.
+
+- **Run**: `bash main.sh` — executes `python3 -m src.main` (module form, NOT `python3 src/main.py`)
+- **Test all**: `bash test.sh` — executes `python3 -m unittest discover` (no args)
+- **Single test file**: `python3 -m unittest discover -p test_blocks.py` (from repo root)
 
 ## Architecture
 
-| File | Purpose |
-|------|---------|
-| `src/main.py` | Entrypoint — creates sample nodes, prints their repr |
-| `src/htmlnode.py` | `HTMLNode` (base), `LeafNode` (tag+value), `ParentNode` (tag+children) |
-| `src/textnode.py` | `TextNode`, `TextType` enum, `text_node_to_html_node()` converter |
-| `src/splitnodes.py` | `split_nodes_delimiter()` — splits text nodes by delimiter markers |
-| `public/index.html` | Sample static HTML |
-| `public/styles.css` | Sample CSS |
+- `src/main.py` — entrypoint; imports `from src.htmlnode import ...`
+- `src/htmlnode.py` — `HTMLNode`, `LeafNode`, `ParentNode`
+- `src/textnode.py` — `TextNode`, `TextType`, `text_node_to_html_node()`
+- `src/blocks.py` — `BlockType`, `markdown_to_blocks()`, `block_to_block_type()`
+- `src/helpers.py` — `split_nodes_delimiter()`, `extract_markdown_images()` / `extract_markdown_links()`
+- `tests/` — `test_blocks.py`, `test_helpers.py`, `test_htmlnode.py`, `test_textnode.py`
+- `public/` — `index.html`, `styles.css` sample static assets
 
-## Repo Quirks
+## Gotchas
 
-1. **Test discovery requires `-s src`**: `python3 -m unittest discover` (no `-s src`) runs 0 tests. Always use `bash test.sh` or `python3 -m unittest discover -s src`. No `__init__.py` files exist — `src/` is not a package.
+1. **Use plain discovery — no `-s src`**: `src/__init__.py` and `tests/__init__.py` exist; tests import `from src.blocks import ...`. Bare `python3 -m unittest discover` recurses into `tests/` and finds them. `-s src` points discovery into `src/` and misses the `tests/` tree — 0 tests run.
 
-2. **`splitnodes.py` has a script-level invocation**: Lines 27-33 run `split_nodes_delimiter` on test cases at import time. This executes on module import but does not affect unit tests.
+2. **Always run as a module**: every src module uses package imports (`from src.textnode import ...`), so `python3 src/main.py` fails with `ModuleNotFoundError`. Use `python3 -m src.main`.
 
-3. **No deps, no config**: Pure Python 3 stdlib. No `requirements.txt`, `pyproject.toml`, venv, mypy, ruff, black, or CI. `opencode.json` only sets `lsp: true`.
+3. **`pyproject.toml` is a stub**: only declares `name = "staticsitegen"`. No build config, no `requirements.txt`, no venv — stdlib only.
 
-4. **No linter/formatter/typechecker**: None configured. If the user asks for one, set it up — don't assume defaults.
+4. **No linter/formatter/typechecker configured**: `opencode.json` only sets `"lsp": true`, and there is no CI. If the user asks for tooling, set it up — don't assume defaults.
