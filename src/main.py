@@ -1,5 +1,6 @@
-from src.htmlnode import HTMLNode, LeafNode
-from src.textnode import TextNode, TextType
+from blocks import block_to_block_type, markdown_to_blocks
+from htmlnode import HTMLNode, LeafNode
+from textnode import TextNode, TextType
 
 
 def main():
@@ -9,6 +10,12 @@ def main():
     print(text_node.__repr__())
     print(leaf_node.__repr__())
     print(html_node.__repr__())
+
+
+def markdown_to_html_node(markdown: str) -> HTMLNode:
+    markdown_blocks = markdown_to_blocks(markdown)
+    for block in markdown_blocks:
+        block_type = block_to_block_type(block)
 
 
 main()
