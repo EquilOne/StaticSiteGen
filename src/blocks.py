@@ -1,5 +1,7 @@
 from enum import Enum
 
+from src.htmlnode import HTMLNode, LeafNode, ParentNode
+
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -46,3 +48,12 @@ def block_to_block_type(md_block: str) -> BlockType:
                 continue
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
+
+
+def list_block_to_html_node(md_block: str) -> HTMLNode:
+    lines = md_block.splitlines()
+    nodes = []
+    if block_to_block_type(md_block) == BlockType.UNORDERED_LIST:
+        for line in lines:
+            nodes.append(LeafNode("li", line.strip("- \t")))
+        html_list_node = ParentNode("ul", nodes)
