@@ -50,10 +50,18 @@ def block_to_block_type(md_block: str) -> BlockType:
     return BlockType.PARAGRAPH
 
 
+def heading_to_heading_level(block: str) -> int:
+    if block_to_block_type(block) == BlockType.HEADING and type(block[1]) == "int":
+        return int(block[1])
+
+
 def list_block_to_html_node(md_block: str) -> HTMLNode:
     lines = md_block.splitlines()
     nodes = []
     if block_to_block_type(md_block) == BlockType.UNORDERED_LIST:
         for line in lines:
             nodes.append(LeafNode("li", line.strip("- \t")))
-        html_list_node = ParentNode("ul", nodes)
+        return ParentNode("ul", nodes)
+    for line in lines:
+        nodes.append(LeafNode("li", line.strip("1234567890. \t")))
+    return ParentNode("ol", nodes)

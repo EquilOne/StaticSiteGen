@@ -1,6 +1,7 @@
 import re
 
-from src.textnode import TextNode, TextType
+from src.htmlnode import HTMLNode
+from src.textnode import TextNode, TextType, text_node_to_html_node
 
 
 def text_to_textnodes(text: str) -> list[TextNode]:
@@ -115,3 +116,11 @@ def extract_markdown_images(text: str) -> list[tuple[str, str]]:
 def extract_markdown_links(text: str) -> list[tuple[str, str]]:
     matches = re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
     return matches
+
+
+def text_to_html_children(text: str) -> list[HTMLNode]:
+    text_nodes = text_to_textnodes(text)
+    html_nodes = []
+    for node in text_nodes:
+        html_nodes.append(text_node_to_html_node(node))
+    return html_nodes
