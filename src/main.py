@@ -1,7 +1,12 @@
-from blocks import BlockType, block_to_block_type, markdown_to_blocks
-from helpers import text_to_html_children
-from htmlnode import HTMLNode, LeafNode, ParentNode
-from textnode import TextNode, TextType
+from src.blocks import (
+    BlockType,
+    block_to_block_type,
+    heading_to_heading_level,
+    markdown_to_blocks,
+)
+from src.helpers import text_to_html_children
+from src.htmlnode import HTMLNode, LeafNode, ParentNode
+from src.textnode import TextNode, TextType
 
 
 def main():
@@ -20,6 +25,13 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
         block_type = block_to_block_type(block)
         if block_type == BlockType.PARAGRAPH:
             html_nodes.append(ParentNode("p", text_to_html_children(block)))
+        if block_type == BlockType.HEADING:
+            heading_level = heading_to_heading_level(block)
+            if heading_level not in range(1, 7):
+                raise ValueError(f"Invalid heading level: {heading_level}")
+            html_nodes.append(
+                ParentNode(f"h{heading_level}", text_to_html_children(block))
+            )
     return ParentNode("div", html_nodes)
 
 

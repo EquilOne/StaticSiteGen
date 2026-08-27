@@ -53,6 +53,7 @@ def block_to_block_type(md_block: str) -> BlockType:
 def heading_to_heading_level(block: str) -> int:
     if block_to_block_type(block) == BlockType.HEADING and type(block[1]) == "int":
         return int(block[1])
+    return 0
 
 
 def list_block_to_html_node(md_block: str) -> HTMLNode:
