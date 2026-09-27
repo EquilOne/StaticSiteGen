@@ -219,3 +219,6 @@ __marimo__/
 
 # OpenCode IDE config
 opencode.json
+
+# Repo reports
+REPO_REPORT.md
