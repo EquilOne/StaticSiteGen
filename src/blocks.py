@@ -28,10 +28,9 @@ def block_to_block_type(md_block: str) -> BlockType:
         return BlockType.PARAGRAPH
     if md_block.startswith("#"):
         no_hash = md_block.lstrip("#")
-        hash_count = len(md_block) - len(no_hash)
         if not no_hash.startswith(" "):
             return BlockType.PARAGRAPH
-        if 1 <= hash_count <= 6:
+        if 1 <= count_leading_hashes(md_block) <= 6:
             return BlockType.HEADING
     if md_block.startswith("```\n") and md_block.endswith("```"):
         return BlockType.CODE
@@ -50,12 +49,6 @@ def block_to_block_type(md_block: str) -> BlockType:
     return BlockType.PARAGRAPH
 
 
-def heading_to_heading_level(block: str) -> int:
-    if block_to_block_type(block) == BlockType.HEADING and type(block[1]) == "int":
-        return int(block[1])
-    return 0
-
-
 def list_block_to_html_node(md_block: str) -> HTMLNode:
     lines = md_block.splitlines()
     nodes = []
@@ -66,3 +59,12 @@ def list_block_to_html_node(md_block: str) -> HTMLNode:
     for line in lines:
         nodes.append(LeafNode("li", line.strip("1234567890. \t")))
     return ParentNode("ol", nodes)
+
+
+def count_leading_hashes(md_block) -> int:
+    i = 0
+    count = 0
+    while md_block[i] == "#":
+        count += 1
+        i += 1
+    return count
