@@ -31,7 +31,7 @@ class TextNode:
         return f"TextNode({self.text}, {self.text_type}, {self.url})"
 
 
-def text_node_to_html_node(text_node: TextNode) -> LeafNode | None:
+def text_node_to_html_node(text_node: TextNode) -> LeafNode:
     if has_value(TextType, text_node.text_type):
         match text_node.text_type.value:
             case "text":
