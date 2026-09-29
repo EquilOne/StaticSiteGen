@@ -1,6 +1,6 @@
 from enum import Enum
 
-from src.htmlnode import HTMLNode, LeafNode, ParentNode
+from src.constant import CODE_FENCE_RE, OL_NUM_RE
 
 
 class BlockType(Enum):
@@ -32,33 +32,23 @@ def block_to_block_type(md_block: str) -> BlockType:
             return BlockType.PARAGRAPH
         if 1 <= count_leading_hashes(md_block) <= 6:
             return BlockType.HEADING
-    if md_block.startswith("```\n") and md_block.endswith("```"):
+    if CODE_FENCE_RE.match(md_block):
         return BlockType.CODE
     if all(line.startswith(">") for line in md_block.splitlines()):
         return BlockType.QUOTE
     if all(line.startswith("- ") for line in md_block.splitlines()):
         return BlockType.UNORDERED_LIST
-    if md_block.startswith("1. "):
+    if OL_NUM_RE.match(md_block):
+        starting_index = int(OL_NUM_RE.match(md_block).group(1))
         block_lines = md_block.splitlines()
         for index, text in enumerate(block_lines):
-            if not text.startswith(f"{index + 1}. "):
+            if not text.startswith(f"{starting_index}. "):
                 return BlockType.PARAGRAPH
             else:
+                starting_index += 1
                 continue
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
-
-
-def list_block_to_html_node(md_block: str) -> HTMLNode:
-    lines = md_block.splitlines()
-    nodes = []
-    if block_to_block_type(md_block) == BlockType.UNORDERED_LIST:
-        for line in lines:
-            nodes.append(LeafNode("li", line.strip("- \t")))
-        return ParentNode("ul", nodes)
-    for line in lines:
-        nodes.append(LeafNode("li", line.strip("1234567890. \t")))
-    return ParentNode("ol", nodes)
 
 
 def count_leading_hashes(md_block) -> int:
