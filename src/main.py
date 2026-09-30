@@ -1,6 +1,16 @@
+import os
+import shutil
+
 from src.convert import markdown_to_html_node
 from src.htmlnode import HTMLNode, LeafNode
 from src.textnode import TextNode, TextType
+
+
+def copy_files(src_dir: str, dst_dir: str):
+    cwd_path = os.getcwd()
+    dst_dir_path = os.path.join(dst_dir, cwd_path)
+    if os.path.exists(dst_dir_path):
+        shutil.rmtree(dst_dir_path)
 
 
 def main():
