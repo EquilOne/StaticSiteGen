@@ -222,3 +222,6 @@ opencode.json
 
 # Repo reports
 REPO_REPORT.md
+
+# Generated site output
+public/
