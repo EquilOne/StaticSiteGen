@@ -2,12 +2,11 @@ import os
 import shutil
 
 
-def copy_files(
-    src_dir: str, dst_dir: str, create_dst: bool = False, root_dir: str | None = None
-):
-    if root_dir is None:
+def copy_files(src_dir: str, dst_dir: str, root_dir: str | None = None):
+    if root_dir is not None:
+        print(f"Using {root_dir} as root directory")
+    else:
         root_dir = os.getcwd()
-        print(f"Root directory not specified, using {root_dir}")
     if not os.path.exists(root_dir):
         raise FileNotFoundError(f"Root directory {root_dir} does not exist")
     if not os.path.isdir(root_dir):
@@ -34,7 +33,7 @@ def copy_files(
         item_path = os.path.join(src_dir_path, item)
         if os.path.isdir(item_path):
             print(f"Creating directory '{item}' in {dst_dir_path}")
-            copy_files(item_path, os.path.join(dst_dir_path, item), True, item_path)
+            copy_files(item_path, os.path.join(dst_dir_path, item), item_path)
         else:
             print(f"Copying {item} to {dst_dir_path}")
             shutil.copy(item_path, dst_dir_path)
@@ -53,11 +52,12 @@ def main():
     # print(html_code_node.__repr__())
 
     try:
-        copy_files("static", "public", True)
+        copy_files("static", "public")
     except FileNotFoundError as e:
         print(e)
     except NotADirectoryError as e:
         print(e)
 
 
-main()
+if __name__ == "__main__":
+    main()
