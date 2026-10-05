@@ -21,6 +21,7 @@ def _copy_files(
         os.path.dirname(os.path.normpath(dst_path)),
     )
     os.mkdir(dst_path)
+    logger.info("Copying files from '%s' --> '%s'", src_path, dst_path)
 
     src_dir_contents = os.listdir(src_path)
     for item in src_dir_contents:
@@ -30,14 +31,14 @@ def _copy_files(
         if os.path.isdir(item_path):
             _copy_files(item_path, os.path.join(dst_path, item))
         else:
-            logger.debug("Copying '%s' to '%s'", item, dst_path)
+            logger.debug("Copying '%s' --> '%s'", item, dst_path)
             shutil.copy2(item_path, dst_path)
 
 
 def main() -> None:
 
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     try:
@@ -54,6 +55,10 @@ def main() -> None:
             shutil.rmtree(DST_DIR)
             logger.info("Cleanup complete, '%s' removed.", DST_DIR.name)
         _copy_files(SRC_DIR, DST_DIR)
+        logger.info(
+            "Successfully copied contents of '%s', --> '%s'", SRC_DIR.name, DST_DIR
+        )
+
     except OSError:
         logger.exception("Static site generation failed")
         raise SystemExit(1)
