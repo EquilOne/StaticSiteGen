@@ -21,9 +21,8 @@ def _copy_files(
         os.path.dirname(os.path.normpath(dst_path)),
     )
     os.mkdir(dst_path)
-    logger.info("Copying files from '%s' --> '%s'", src_path, dst_path)
 
-    src_dir_contents = os.listdir(src_path)
+    src_dir_contents = sorted(os.listdir(src_path))
     for item in src_dir_contents:
         item_path = os.path.join(src_path, item)
         if os.path.islink(item_path):
@@ -43,21 +42,18 @@ def main() -> None:
     )
     try:
         if not os.path.exists(SRC_DIR):
-            raise FileNotFoundError(f"Source directory '{SRC_DIR.name}' does not exist")
+            raise FileNotFoundError(f"Source directory '{SRC_DIR}' does not exist")
         if not os.path.isdir(SRC_DIR):
-            raise NotADirectoryError(
-                f"Source directory '{SRC_DIR.name}' is not a directory"
-            )
+            raise NotADirectoryError(f"Source directory '{SRC_DIR}' is not a directory")
         if os.path.isdir(DST_DIR):
             logger.info(
                 "Directory '%s' already exists, performing cleanup.", DST_DIR.name
             )
             shutil.rmtree(DST_DIR)
             logger.info("Cleanup complete, '%s' removed.", DST_DIR.name)
+        logger.info("Copying files from '%s' --> '%s'", SRC_DIR, DST_DIR)
         _copy_files(SRC_DIR, DST_DIR)
-        logger.info(
-            "Successfully copied contents of '%s', --> '%s'", SRC_DIR.name, DST_DIR
-        )
+        logger.info("Successfully copied files from '%s' --> '%s'", SRC_DIR, DST_DIR)
 
     except OSError:
         logger.exception("Static site generation failed")
