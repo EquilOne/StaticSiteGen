@@ -3,6 +3,7 @@ import os
 import shutil
 
 from src.constant import DST_DIR, PROJECT_ROOT, SRC_DIR
+from src.convert import markdown_to_html_node
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,21 @@ def extract_title(markdown: str) -> str:
             return line[1:].strip()
 
     raise ValueError("No title found in markdown")
+
+
+def generate_page(src_path, tmpl_path, dst_path):
+    logger.info("Generating page in %s from %s with %s", dst_path, src_path, tmpl_path)
+
+    with open(src_path, "r", encoding="utf-8") as f:
+        src_md_contents = f.read()
+    with open(tmpl_path, "r", encoding="utf-8") as f:
+        tmpl_contents = f.read()
+
+    src_html_str = markdown_to_html_node(src_md_contents).to_html()
+    page_title = extract_title(src_md_contents)
+
+    tmpl_contents.replace("{{ Title }}", page_title)
+    tmpl_contents.replace("{{ Content }}", src_html_str)
 
 
 def _copy_files(
