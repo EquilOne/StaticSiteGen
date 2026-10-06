@@ -2,9 +2,18 @@ import logging
 import os
 import shutil
 
-from src.constant import DST_DIR, SRC_DIR
+from src.constant import DST_DIR, PROJECT_ROOT, SRC_DIR
 
 logger = logging.getLogger(__name__)
+
+
+def extract_title(markdown: str) -> str:
+    lines: list[str] = markdown.splitlines()
+    for line in lines:
+        if line.startswith("# "):
+            return line[1:].strip()
+
+    raise ValueError("No title found in markdown")
 
 
 def _copy_files(
@@ -13,7 +22,8 @@ def _copy_files(
     """Recursively copy the contents of src_path into dst_path.
 
     dst_path must not exist; the caller validates src and cleans dst first.
-    Skips symlinks."""
+    Skips symlinks; warns and skips entries that are neither regular
+    files nor directories."""
 
     logger.debug(
         "Creating directory '%s' in '%s'",
@@ -27,17 +37,23 @@ def _copy_files(
         item_path = os.path.join(src_path, item)
         if os.path.islink(item_path):
             continue
-        if os.path.isdir(item_path):
+        elif os.path.isdir(item_path):
             _copy_files(item_path, os.path.join(dst_path, item))
-        else:
+        elif os.path.isfile(item_path):
             logger.debug("Copying '%s' --> '%s'", item, dst_path)
             shutil.copy2(item_path, dst_path)
+        else:
+            logger.warning("Unsupported file %s, skipping", item_path)
 
 
 def main() -> None:
 
+    with open(os.path.join(PROJECT_ROOT, "tests/test.md"), "r", encoding="utf-8") as f:
+        content = f.read()
+    print(extract_title(content))
+
     logging.basicConfig(
-        level=logging.INFO,
+        level=logging.DEBUG,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     try:
@@ -45,18 +61,34 @@ def main() -> None:
             raise FileNotFoundError(f"Source directory '{SRC_DIR}' does not exist")
         if not os.path.isdir(SRC_DIR):
             raise NotADirectoryError(f"Source directory '{SRC_DIR}' is not a directory")
-        if os.path.isdir(DST_DIR):
-            logger.info(
-                "Directory '%s' already exists, performing cleanup.", DST_DIR.name
+        if SRC_DIR.resolve().is_relative_to(
+            DST_DIR.resolve()
+        ) or DST_DIR.resolve().is_relative_to(SRC_DIR.resolve()):
+            raise ValueError(
+                "Source and destination directories must not be the same or a subdirectory of each other"
             )
-            shutil.rmtree(DST_DIR)
-            logger.info("Cleanup complete, '%s' removed.", DST_DIR.name)
+        if os.path.lexists(DST_DIR):
+            if os.path.islink(DST_DIR):
+                logger.debug("%s is a symlink, performing cleanup", DST_DIR)
+                os.unlink(DST_DIR)
+            elif os.path.isdir(DST_DIR):
+                logger.info(
+                    "Directory '%s' already exists, performing cleanup.", DST_DIR
+                )
+                shutil.rmtree(DST_DIR)
+                logger.info("Cleanup complete, '%s' removed.", DST_DIR)
+            else:
+                logger.debug("%s is not a directory, performing cleanup", DST_DIR)
+                os.unlink(DST_DIR)
         logger.info("Copying files from '%s' --> '%s'", SRC_DIR, DST_DIR)
         _copy_files(SRC_DIR, DST_DIR)
         logger.info("Successfully copied files from '%s' --> '%s'", SRC_DIR, DST_DIR)
 
-    except OSError:
-        logger.exception("Static site generation failed")
+    except OSError as e:
+        logger.error("Static site generation failed: %s", e)
+        raise SystemExit(1)
+    except ValueError as e:
+        logger.error("Static site generation failed: %s", e)
         raise SystemExit(1)
 
 
