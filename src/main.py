@@ -17,36 +17,40 @@ def extract_title(markdown: str) -> str:
     raise ValueError("No title found in markdown")
 
 
-def generate_page(src_path, tmpl_path, dst_path):
-    logger.info("Generating page in %s from %s with %s", dst_path, src_path, tmpl_path)
-
-    with open(src_path, "r", encoding="utf-8") as f:
-        src_md_contents = f.read()
-    with open(tmpl_path, "r", encoding="utf-8") as f:
-        tmpl_contents = f.read()
-
-    src_html_str = markdown_to_html_node(src_md_contents).to_html()
-    page_title = extract_title(src_md_contents)
-
-    tmpl_contents.replace("{{ Title }}", page_title)
-    tmpl_contents.replace("{{ Content }}", src_html_str)
+def generate_page(src_file, tmpl_file, dst_path):
+    logger.info("Generating page in %s from %s with %s", dst_path, src_file, tmpl_file)
 
     if not os.path.lexists(dst_path):
-        if os.path.isdir(dst_path):
-            os.makedirs(dst_path)
+        os.makedirs(dst_path)
 
+    if not os.path.exists(src_file):
+        logger.error("Source file '%s' does not exist", src_file)
+    if os.path.isdir(src_file):
+        logger.error("Source file '%s' is a directory", src_file)
+    else:
+        with open(src_file, "r", encoding="utf-8") as f:
+            src_md_contents = f.read()
+        src_html_str = markdown_to_html_node(src_md_contents).to_html()
+        print(src_html_str)
+        page_title = extract_title(src_md_contents)
+        if not os.path.exists(tmpl_file):
+            logger.error("Source file '%s' does not exist", tmpl_file)
+        if os.path.isdir(tmpl_file):
+            logger.error("Source file '%s' is a directory", tmpl_file)
         else:
-            logger.error("Destination path '%s' is not a directory", dst_path)
-            raise SystemExit(1)
-
-    with open(os.path.join(dst_path, "index.html"), "w", encoding="utf-8") as f:
-        f.write(tmpl_contents)
+            with open(tmpl_file, "r", encoding="utf-8") as f:
+                tmpl_contents = f.read()
+            contents = tmpl_contents.replace("{{ Title }}", page_title).replace(
+                "{{ Content }}", src_html_str
+            )
+            with open(os.path.join(dst_path, "index.html"), "w", encoding="utf-8") as f:
+                f.write(contents)
 
 
 def _copy_files(
     src_path: str | os.PathLike[str], dst_path: str | os.PathLike[str]
 ) -> None:
-    """Recursively copy the contents of src_path into dst_path.
+    """Recursively copy the contents of src_file into dst_path.
 
     dst_path must not exist; the caller validates src and cleans dst first.
     Skips symlinks; warns and skips entries that are neither regular
@@ -117,6 +121,12 @@ def main() -> None:
     except ValueError as e:
         logger.error("Static site generation failed: %s", e)
         raise SystemExit(1)
+
+    generate_page(
+        os.path.join(PROJECT_ROOT, "content/index.md"),
+        os.path.join(PROJECT_ROOT, "template.html"),
+        os.path.join(PROJECT_ROOT, "public"),
+    )
 
 
 if __name__ == "__main__":
