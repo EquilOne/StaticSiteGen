@@ -31,6 +31,17 @@ def generate_page(src_path, tmpl_path, dst_path):
     tmpl_contents.replace("{{ Title }}", page_title)
     tmpl_contents.replace("{{ Content }}", src_html_str)
 
+    if not os.path.lexists(dst_path):
+        if os.path.isdir(dst_path):
+            os.makedirs(dst_path)
+
+        else:
+            logger.error("Destination path '%s' is not a directory", dst_path)
+            raise SystemExit(1)
+
+    with open(os.path.join(dst_path, "index.html"), "w", encoding="utf-8") as f:
+        f.write(tmpl_contents)
+
 
 def _copy_files(
     src_path: str | os.PathLike[str], dst_path: str | os.PathLike[str]
