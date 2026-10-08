@@ -1,6 +1,7 @@
 from enum import Enum
 
 from src.constant import CODE_FENCE_RE, OL_NUM_RE
+from src.htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class BlockType(Enum):
@@ -49,6 +50,18 @@ def block_to_block_type(md_block: str) -> BlockType:
                 continue
         return BlockType.ORDERED_LIST
     return BlockType.PARAGRAPH
+
+
+def list_block_to_html_node(md_block: str) -> HTMLNode:
+    lines = md_block.splitlines()
+    nodes = []
+    if block_to_block_type(md_block) == BlockType.UNORDERED_LIST:
+        for line in lines:
+            nodes.append(LeafNode("li", line.strip("- \t")))
+        return ParentNode("ul", nodes)
+    for line in lines:
+        nodes.append(LeafNode("li", line.strip("1234567890. \t")))
+    return ParentNode("ol", nodes)
 
 
 def count_leading_hashes(md_block) -> int:
