@@ -12,7 +12,7 @@ def extract_title(markdown: str) -> str:
     lines: list[str] = markdown.splitlines()
     for line in lines:
         if line.startswith("# "):
-            return line[1:].strip()
+            return line[2:].strip()
 
     raise ValueError("No title found in markdown")
 
@@ -20,23 +20,40 @@ def extract_title(markdown: str) -> str:
 def generate_page(src_file, tmpl_file, dst_path):
     logger.info("Generating page in %s from %s with %s", dst_path, src_file, tmpl_file)
 
-    if not os.path.lexists(dst_path):
+    if os.path.lexists(dst_path):
+        logger.debug("Destination path '%s' exists", dst_path)
+        if os.path.islink(dst_path):
+            logger.error("Destination path '%s' is a symlink", dst_path)
+            raise SystemExit(1)
+        elif os.path.isfile(dst_path):
+            logger.error("Destination path '%s' is a file", dst_path)
+            raise SystemExit(1)
+        elif os.path.isdir(dst_path):
+            logger.debug("Destination path '%s' is a directory", dst_path)
+        else:
+            logger.error("Destination path '%s' is of unknown type", dst_path)
+            raise SystemExit(1)
+
+    else:
         os.makedirs(dst_path)
 
     if not os.path.exists(src_file):
         logger.error("Source file '%s' does not exist", src_file)
+        raise SystemExit(1)
     if os.path.isdir(src_file):
         logger.error("Source file '%s' is a directory", src_file)
+        raise SystemExit(1)
     else:
         with open(src_file, "r", encoding="utf-8") as f:
             src_md_contents = f.read()
         src_html_str = markdown_to_html_node(src_md_contents).to_html()
-        print(src_html_str)
         page_title = extract_title(src_md_contents)
         if not os.path.exists(tmpl_file):
-            logger.error("Source file '%s' does not exist", tmpl_file)
+            logger.error("Template file '%s' does not exist", tmpl_file)
+            raise SystemExit(1)
         if os.path.isdir(tmpl_file):
-            logger.error("Source file '%s' is a directory", tmpl_file)
+            logger.error("Template file '%s' is a directory", tmpl_file)
+            raise SystemExit(1)
         else:
             with open(tmpl_file, "r", encoding="utf-8") as f:
                 tmpl_contents = f.read()
@@ -78,10 +95,6 @@ def _copy_files(
 
 
 def main() -> None:
-
-    with open(os.path.join(PROJECT_ROOT, "tests/test.md"), "r", encoding="utf-8") as f:
-        content = f.read()
-    print(extract_title(content))
 
     logging.basicConfig(
         level=logging.DEBUG,
