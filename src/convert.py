@@ -45,6 +45,9 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             lines = block.splitlines()
             line_nodes = []
             for line in lines:
+                line = line.strip("> ")
+                if line == "":
+                    continue
                 line_nodes.append(ParentNode("p", text_to_html_children(line)))
             html_nodes.append(ParentNode("blockquote", line_nodes))
         if (
