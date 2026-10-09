@@ -67,7 +67,7 @@ def list_block_to_html_node(md_block: str) -> HTMLNode:
 def count_leading_hashes(md_block) -> int:
     i = 0
     count = 0
-    while md_block[i] == "#":
+    while md_block[i] == "#" and i < 6:
         count += 1
         i += 1
     return count
