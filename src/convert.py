@@ -45,7 +45,7 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             lines = block.splitlines()
             line_nodes = []
             for line in lines:
-                line = line.strip("> ")
+                line = line.lstrip("> ").strip(" ")
                 if line == "":
                     continue
                 line_nodes.append(ParentNode("p", text_to_html_children(line)))
@@ -64,12 +64,12 @@ def list_block_to_html_node(md_block: str) -> HTMLNode:
     nodes = []
     if block_to_block_type(md_block) == BlockType.UNORDERED_LIST:
         for line in lines:
-            clean_line = line.strip("- \t")
+            clean_line = line.lstrip("- \t").strip(" ")
             content = text_to_html_children(clean_line)
             nodes.append(ParentNode("li", content))
         return ParentNode("ul", nodes)
     for line in lines:
-        clean_line = line.strip("1234567890. \t")
+        clean_line = line.lstrip("1234567890. \t").strip(" ")
         content = text_to_html_children(clean_line)
         nodes.append(ParentNode("li", content))
     return ParentNode("ol", nodes)
