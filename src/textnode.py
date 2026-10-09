@@ -32,32 +32,21 @@ class TextNode:
 
 
 def text_node_to_html_node(text_node: TextNode) -> LeafNode:
-    if has_value(TextType, text_node.text_type):
-        match text_node.text_type.value:
-            case "text":
-                return LeafNode(None, value=text_node.text)
-            case "bold":
-                return LeafNode("b", value=text_node.text)
-            case "italic":
-                return LeafNode("i", value=text_node.text)
-            case "code":
-                return LeafNode("code", value=text_node.text)
-            case "link":
-                if text_node.url is None:
-                    raise ValueError("Invalid URL")
-                return LeafNode("a", text_node.text, {"href": text_node.url})
-            case "image":
-                if text_node.url is None:
-                    raise ValueError("Invalid URL")
-                return LeafNode(
-                    "img", "", {"src": text_node.url, "alt": text_node.text}
-                )
+    match text_node.text_type:
+        case TextType.TEXT:
+            return LeafNode(None, value=text_node.text)
+        case TextType.BOLD:
+            return LeafNode("b", value=text_node.text)
+        case TextType.ITALIC:
+            return LeafNode("i", value=text_node.text)
+        case TextType.CODE:
+            return LeafNode("code", value=text_node.text)
+        case TextType.LINK:
+            if text_node.url is None:
+                raise ValueError("Invalid URL")
+            return LeafNode("a", text_node.text, {"href": text_node.url})
+        case TextType.IMAGE:
+            if text_node.url is None:
+                raise ValueError("Invalid URL")
+            return LeafNode("img", "", {"src": text_node.url, "alt": text_node.text})
     raise ValueError(f"Invalid text type: {text_node.text_type}")
-
-
-def has_value(enum_type, value):
-    try:
-        enum_type(value)
-        return True
-    except ValueError:
-        return False
