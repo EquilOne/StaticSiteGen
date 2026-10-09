@@ -2,6 +2,7 @@ import logging
 import os
 import shutil
 
+from src.blocks import BlockType, block_to_block_type, markdown_to_blocks
 from src.constant import DST_DIR, PROJECT_ROOT, SRC_DIR
 from src.convert import markdown_to_html_node
 
@@ -9,12 +10,16 @@ logger = logging.getLogger(__name__)
 
 
 def extract_title(markdown: str) -> str:
-    lines: list[str] = markdown.splitlines()
-    for line in lines:
-        if line.startswith("# "):
-            return line[2:].strip()
+    blocks: list[str] = markdown_to_blocks(markdown)
+    for block in blocks:
+        if block_to_block_type(block) != BlockType.HEADING:
+            continue
+        lines: list[str] = block.splitlines()
+        for line in lines:
+            if line.startswith("# "):
+                return line[2:].strip()
 
-    raise ValueError("No title found in markdown")
+        raise ValueError("No title found in markdown")
 
 
 def generate_page(src_file, tmpl_file, dst_path):
