@@ -6,7 +6,7 @@ from src.blocks import (
     count_leading_hashes,
     markdown_to_blocks,
 )
-from src.constant import CODE_FENCE_RE
+from src.constant import CODE_FENCE_RE, OL_NUM_RE
 from src.helpers import text_to_html_children
 from src.htmlnode import HTMLNode, ParentNode
 from src.textnode import TextNode, TextType, text_node_to_html_node
@@ -64,12 +64,12 @@ def list_block_to_html_node(md_block: str) -> HTMLNode:
     nodes = []
     if block_to_block_type(md_block) == BlockType.UNORDERED_LIST:
         for line in lines:
-            clean_line = line.lstrip("- \t").strip(" ")
+            clean_line = line.removeprefix("- ").strip()
             content = text_to_html_children(clean_line)
             nodes.append(ParentNode("li", content))
         return ParentNode("ul", nodes)
     for line in lines:
-        clean_line = line.lstrip("1234567890. \t").strip(" ")
+        clean_line = OL_NUM_RE.sub("", line).strip()
         content = text_to_html_children(clean_line)
         nodes.append(ParentNode("li", content))
     return ParentNode("ol", nodes)
