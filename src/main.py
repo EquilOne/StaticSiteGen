@@ -1,3 +1,4 @@
+import html
 import logging
 import os
 import shutil
@@ -17,9 +18,9 @@ def extract_title(markdown: str) -> str:
         lines: list[str] = block.splitlines()
         for line in lines:
             if line.startswith("# "):
-                return line[2:].strip()
+                return html.escape(line[2:].strip())
 
-        raise ValueError("No title found in markdown")
+    raise ValueError("No title found in markdown")
 
 
 def generate_page(src_file, tmpl_file, dst_path):
@@ -102,7 +103,7 @@ def _copy_files(
 def main() -> None:
 
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s: %(message)s",
     )
     try:
