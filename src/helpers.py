@@ -7,10 +7,10 @@ from src.textnode import TextNode, TextType, text_node_to_html_node
 def text_to_textnodes(text: str) -> list[TextNode]:
     delimiters = {TextType.BOLD: "**", TextType.ITALIC: "_", TextType.CODE: "`"}
     new_nodes = [TextNode(text, TextType.TEXT)]
+    processed_nodes = split_nodes_image_and_link(new_nodes)
     for k, v in delimiters.items():
-        new_nodes = split_nodes_delimiter(new_nodes, v, k)
-    new_nodes = split_nodes_image_and_link(new_nodes)
-    return new_nodes
+        processed_nodes = split_nodes_delimiter(processed_nodes, v, k)
+    return processed_nodes
 
 
 def split_nodes_delimiter(
