@@ -8,7 +8,7 @@ from src.blocks import (
 )
 from src.constant import CODE_FENCE_RE
 from src.helpers import text_to_html_children
-from src.htmlnode import HTMLNode, LeafNode, ParentNode
+from src.htmlnode import HTMLNode, ParentNode
 from src.textnode import TextNode, TextType, text_node_to_html_node
 
 
@@ -54,7 +54,7 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
             block_type == BlockType.ORDERED_LIST
             or block_type == BlockType.UNORDERED_LIST
         ):
-            html_nodes.append(list_block_to_html_node(markdown))
+            html_nodes.append(list_block_to_html_node(block))
 
     return ParentNode("div", html_nodes)
 
@@ -64,8 +64,12 @@ def list_block_to_html_node(md_block: str) -> HTMLNode:
     nodes = []
     if block_to_block_type(md_block) == BlockType.UNORDERED_LIST:
         for line in lines:
-            nodes.append(LeafNode("li", line.strip("- \t")))
+            clean_line = line.strip("- \t")
+            content = text_to_html_children(clean_line)
+            nodes.append(ParentNode("li", content))
         return ParentNode("ul", nodes)
     for line in lines:
-        nodes.append(LeafNode("li", line.strip("1234567890. \t")))
+        clean_line = line.strip("1234567890. \t")
+        content = text_to_html_children(clean_line)
+        nodes.append(ParentNode("li", content))
     return ParentNode("ol", nodes)
