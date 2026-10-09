@@ -1,7 +1,7 @@
 import unittest
 
-from src.htmlnode import LeafNode, ParentNode
 from src.convert import markdown_to_html_node
+from src.htmlnode import LeafNode, ParentNode
 
 
 class TestMarkdownToHTML(unittest.TestCase):
@@ -175,6 +175,112 @@ class TestMarkdownToHTML(unittest.TestCase):
         expected = ParentNode(
             "div",
             [ParentNode("pre", [LeafNode("code", "never closed")])],
+        )
+        self.assertEqual(html_node, expected)
+
+    def test_quote_block_single_line(self):
+        html_node = markdown_to_html_node("> some quote")
+        expected = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "blockquote", [ParentNode("p", [LeafNode(None, "some quote")])]
+                )
+            ],
+        )
+        self.assertEqual(html_node, expected)
+
+    def test_quote_block_multiline(self):
+        html_node = markdown_to_html_node("> first line\n> second line")
+        expected = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "blockquote",
+                    [
+                        ParentNode("p", [LeafNode(None, "first line")]),
+                        ParentNode("p", [LeafNode(None, "second line")]),
+                    ],
+                )
+            ],
+        )
+        self.assertEqual(html_node, expected)
+
+    def test_quote_line_ending_with_arrow_preserved(self):
+        html_node = markdown_to_html_node("> arrow ->")
+        expected = ParentNode(
+            "div",
+            [ParentNode("blockquote", [ParentNode("p", [LeafNode(None, "arrow ->")])])],
+        )
+        self.assertEqual(html_node, expected)
+
+    def test_unordered_list_simple(self):
+        html_node = markdown_to_html_node("- first\n- second")
+        expected = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "ul",
+                    [
+                        ParentNode("li", [LeafNode(None, "first")]),
+                        ParentNode("li", [LeafNode(None, "second")]),
+                    ],
+                )
+            ],
+        )
+        self.assertEqual(html_node, expected)
+
+    def test_unordered_list_item_with_inline_markdown(self):
+        html_node = markdown_to_html_node("- a **bold** item")
+        expected = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "ul",
+                    [
+                        ParentNode(
+                            "li",
+                            [
+                                LeafNode(None, "a "),
+                                LeafNode("b", "bold"),
+                                LeafNode(None, " item"),
+                            ],
+                        )
+                    ],
+                )
+            ],
+        )
+        self.assertEqual(html_node, expected)
+
+    def test_ordered_list_simple(self):
+        html_node = markdown_to_html_node("1. first\n2. second")
+        expected = ParentNode(
+            "div",
+            [
+                ParentNode(
+                    "ol",
+                    [
+                        ParentNode("li", [LeafNode(None, "first")]),
+                        ParentNode("li", [LeafNode(None, "second")]),
+                    ],
+                )
+            ],
+        )
+        self.assertEqual(html_node, expected)
+
+    def test_ordered_list_keeps_content_starting_with_digits(self):
+        html_node = markdown_to_html_node("1. 1984 by Orwell")
+        expected = ParentNode(
+            "div",
+            [ParentNode("ol", [ParentNode("li", [LeafNode(None, "1984 by Orwell")])])],
+        )
+        self.assertEqual(html_node, expected)
+
+    def test_ordered_list_item_all_digits(self):
+        html_node = markdown_to_html_node("1. 100")
+        expected = ParentNode(
+            "div",
+            [ParentNode("ol", [ParentNode("li", [LeafNode(None, "100")])])],
         )
         self.assertEqual(html_node, expected)
 
