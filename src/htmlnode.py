@@ -1,3 +1,6 @@
+import html
+
+
 class HTMLNode:
     def __init__(
         self,
@@ -19,7 +22,7 @@ class HTMLNode:
         if self.props is None or self.props == {}:
             return props_string
         for key, value in self.props.items():
-            props_string += f' {key}="{value}"'
+            props_string += f' {html.escape(key)}="{html.escape(value)}"'
         return props_string
 
     def __eq__(self, other) -> bool:
@@ -44,8 +47,10 @@ class LeafNode(HTMLNode):
         if self.value is None:
             raise ValueError("Invalid HTML: Leaf nodes require a 'value' argument")
         if not self.tag:
-            return self.value
-        return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
+            return html.escape(self.value)
+        return (
+            f"<{self.tag}{self.props_to_html()}>{html.escape(self.value)}</{self.tag}>"
+        )
 
     def __repr__(self):
         return f"LeafNode({self.tag}, {self.value}, {self.props})"
