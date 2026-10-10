@@ -8,7 +8,7 @@ from src.convert import markdown_to_html_node
 logger = logging.getLogger(__name__)
 
 
-def generate_page(src_file, tmpl_file, dst_path):
+def generate_page(src_file, tmpl_file, dst_path, basepath="/"):
     logger.info("Generating page in %s from %s with %s", dst_path, src_file, tmpl_file)
 
     if not os.path.exists(src_file):
@@ -31,8 +31,11 @@ def generate_page(src_file, tmpl_file, dst_path):
         else:
             with open(tmpl_file, "r", encoding="utf-8") as f:
                 tmpl_contents = f.read()
-            contents = tmpl_contents.replace("{{ Title }}", page_title).replace(
-                "{{ Content }}", src_html_str
+            contents = (
+                tmpl_contents.replace("{{ Title }}", page_title)
+                .replace("{{ Content }}", src_html_str)
+                .replace('href="/', f'href="{basepath}')
+                .replace('src="/', f'src="{basepath}')
             )
             if os.path.lexists(dst_path):
                 logger.debug("Destination path '%s' exists", dst_path)
@@ -57,15 +60,17 @@ def generate_page(src_file, tmpl_file, dst_path):
                 f.write(contents)
 
 
-def generate_pages_recursive(src_dir, tmpl_file, dst_dir):
+def generate_pages_recursive(src_dir, tmpl_file, dst_dir, basepath="/"):
     src_dir_contents = sorted(os.listdir(src_dir))
     for item in src_dir_contents:
         item_path = os.path.abspath(os.path.join(src_dir, item))
         print(item_path)
         if os.path.isfile(item_path) and Path(item).suffix.lower() == ".md":
-            generate_page(item_path, tmpl_file, dst_dir)
+            generate_page(item_path, tmpl_file, dst_dir, basepath)
 
         elif os.path.isdir(item_path):
-            generate_pages_recursive(item_path, tmpl_file, os.path.join(dst_dir, item))
+            generate_pages_recursive(
+                item_path, tmpl_file, os.path.join(dst_dir, item), basepath
+            )
         else:
             logger.debug("%s is not a directory or markdown file", item_path)

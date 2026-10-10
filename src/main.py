@@ -3,7 +3,12 @@ import os
 import shutil
 import sys
 
-from src.constant import CONTENT_DIR, DST_DIR, PROJECT_ROOT, PUBLIC_DIR, SRC_DIR
+from src.constant import (
+    CONTENT_DIR,
+    DST_DIR,
+    PROJECT_ROOT,
+    SRC_DIR,
+)
 from src.files import _copy_files
 from src.page import generate_pages_recursive
 
@@ -11,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 if len(sys.argv) > 1:
     basepath = sys.argv[1]
+else:
+    basepath = "/"
 
 
 def main() -> None:
@@ -63,7 +70,8 @@ def main() -> None:
     generate_pages_recursive(
         CONTENT_DIR,
         os.path.join(PROJECT_ROOT, "template.html"),
-        PUBLIC_DIR,
+        DST_DIR,
+        basepath,
     )
 
 
