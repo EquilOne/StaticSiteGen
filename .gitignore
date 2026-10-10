@@ -223,9 +223,6 @@ opencode.json
 # Repo reports
 REPO_REPORT.md
 
-# Generated site output
-public/
-
 # Local reference docs
 .references/
 
