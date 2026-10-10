@@ -56,6 +56,7 @@ def generate_page(src_file, tmpl_file, dst_path, basepath="/"):
 
             stem = Path(src_file).stem
             out_dir = dst_path if stem == "index" else os.path.join(dst_path, stem)
+            os.makedirs(out_dir, exist_ok=True)
             with open(os.path.join(out_dir, "index.html"), "w", encoding="utf-8") as f:
                 f.write(contents)
 
