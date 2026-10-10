@@ -1,3 +1,4 @@
+import html
 from enum import Enum
 
 from src.constant import CODE_FENCE_RE, OL_NUM_RE
@@ -62,6 +63,19 @@ def list_block_to_html_node(md_block: str) -> HTMLNode:
     for line in lines:
         nodes.append(LeafNode("li", line.strip("1234567890. \t")))
     return ParentNode("ol", nodes)
+
+
+def extract_title(markdown: str) -> str:
+    blocks: list[str] = markdown_to_blocks(markdown)
+    for block in blocks:
+        if block_to_block_type(block) != BlockType.HEADING:
+            continue
+        lines: list[str] = block.splitlines()
+        for line in lines:
+            if line.startswith("# "):
+                return html.escape(line[2:].strip())
+
+    raise ValueError("No title found in markdown")
 
 
 def count_leading_hashes(md_block) -> int:
