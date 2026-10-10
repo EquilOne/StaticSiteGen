@@ -64,7 +64,6 @@ def generate_pages_recursive(src_dir, tmpl_file, dst_dir, basepath="/"):
     src_dir_contents = sorted(os.listdir(src_dir))
     for item in src_dir_contents:
         item_path = os.path.abspath(os.path.join(src_dir, item))
-        print(item_path)
         if os.path.isfile(item_path) and Path(item).suffix.lower() == ".md":
             generate_page(item_path, tmpl_file, dst_dir, basepath)
 
